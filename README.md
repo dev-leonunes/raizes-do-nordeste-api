@@ -118,13 +118,23 @@ O seed cria dados locais de teste. Todos os usuários abaixo usam a senha `Senha
 | ATENDENTE | `atendente@raizes.local` |
 | COZINHA   | `cozinha@raizes.local`   |
 | CLIENTE   | `cliente@raizes.local`   |
+| GERENTE   | `gerente.olinda@raizes.local` |
+| ATENDENTE | `atendente.fortaleza@raizes.local` |
+| GERENTE   | `gerente.salvador@raizes.local` |
 
 Também são criados:
 
 | Tipo    | Identificador                          | Descrição                |
 | ------- | -------------------------------------- | ------------------------ |
 | Unidade | `11111111-1111-4111-8111-111111111111` | Raízes Recife Centro     |
+| Unidade | `33333333-3333-4333-8333-333333333333` | Raízes Olinda Carmo      |
+| Unidade | `44444444-4444-4444-8444-444444444444` | Raízes Fortaleza Meireles |
+| Unidade | `99999999-9999-4999-8999-999999999911` | Raízes Salvador Rio Vermelho |
 | Produto | `22222222-2222-4222-8222-222222222222` | Cuscuz com queijo coalho |
+| Produto | `55555555-5555-4555-8555-555555555555` | Tapioca de carne de sol  |
+| Produto | `66666666-6666-4666-8666-666666666666` | Bolo de rolo             |
+| Produto | `77777777-7777-4777-8777-777777777777` | Suco de caju             |
+| Produto | `88888888-8888-4888-8888-888888888888` | Baião de dois            |
 
 Esses dados são apenas para desenvolvimento local e evidências executáveis. Não use dados reais na coleção Postman ou em testes manuais.
 

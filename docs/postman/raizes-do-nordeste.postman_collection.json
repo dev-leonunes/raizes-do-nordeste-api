@@ -36,6 +36,10 @@
     {
       "key": "pedidoRecusadoId",
       "value": ""
+    },
+    {
+      "key": "pedidoCancelamentoId",
+      "value": ""
     }
   ],
   "event": [
@@ -61,492 +65,976 @@
   ],
   "item": [
     {
-      "name": "01 - Login válido como cliente",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"cliente@raizes.local\",\n  \"senha\": \"Senha@123\"\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/auth/login",
-          "host": ["{{baseUrl}}"],
-          "path": ["auth", "login"]
-        }
-      },
-      "event": [
+      "name": "Obrigatorios - evidencias principais",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('returns 200', () => pm.response.to.have.status(200));",
-              "const json = pm.response.json();",
-              "pm.test('returns access token', () => pm.expect(json.accessToken).to.be.a('string').and.not.empty);",
-              "pm.collectionVariables.set('token', json.accessToken);"
+          "name": "01 - Login válido como cliente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
-            "type": "text/javascript"
-          }
-        }
-      ]
-    },
-    {
-      "name": "02 - Login válido como ADMIN",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"admin@raizes.local\",\n  \"senha\": \"Senha@123\"\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/auth/login",
-          "host": ["{{baseUrl}}"],
-          "path": ["auth", "login"]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('returns 200', () => pm.response.to.have.status(200));",
-              "const json = pm.response.json();",
-              "pm.test('returns admin token', () => pm.expect(json.accessToken).to.be.a('string').and.not.empty);",
-              "pm.collectionVariables.set('adminToken', json.accessToken);"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ]
-    },
-    {
-      "name": "03 - Registrar novo usuário",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"nome\": \"Cliente Postman\",\n  \"email\": \"cliente.postman.{{$timestamp}}@raizes.local\",\n  \"senha\": \"Senha@123\",\n  \"perfil\": \"CLIENTE\"\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/auth/registrar",
-          "host": ["{{baseUrl}}"],
-          "path": ["auth", "registrar"]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('returns 201', () => pm.response.to.have.status(201));",
-              "const json = pm.response.json();",
-              "pm.test('returns registered user token', () => pm.expect(json.accessToken).to.be.a('string').and.not.empty);",
-              "pm.test('does not expose password hash', () => pm.expect(json.usuario).not.to.have.property('senhaHash'));",
-              "pm.collectionVariables.set('usuarioRegistradoToken', json.accessToken);"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ]
-    },
-    {
-      "name": "04 - Acesso sem token retorna 401",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "{{baseUrl}}/pedidos",
-          "host": ["{{baseUrl}}"],
-          "path": ["pedidos"]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": ["pm.test('returns 401', () => pm.response.to.have.status(401));"],
-            "type": "text/javascript"
-          }
-        }
-      ]
-    },
-    {
-      "name": "05 - Perfil sem permissão retorna 403",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/usuarios",
-          "host": ["{{baseUrl}}"],
-          "path": ["usuarios"]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": ["pm.test('returns 403', () => pm.response.to.have.status(403));"],
-            "type": "text/javascript"
-          }
-        }
-      ]
-    },
-    {
-      "name": "06 - Campo obrigatório ausente retorna 422",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"unidadeId\": \"{{unidadeId}}\",\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": 1\n    }\n  ]\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/pedidos",
-          "host": ["{{baseUrl}}"],
-          "path": ["pedidos"]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": ["pm.test('returns 422', () => pm.response.to.have.status(422));"],
-            "type": "text/javascript"
-          }
-        }
-      ]
-    },
-    {
-      "name": "07 - Tipo ou formato inválido retorna 422",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"unidadeId\": \"{{unidadeId}}\",\n  \"canalPedido\": \"APP\",\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": \"uma\"\n    }\n  ]\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/pedidos",
-          "host": ["{{baseUrl}}"],
-          "path": ["pedidos"]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": ["pm.test('returns 422', () => pm.response.to.have.status(422));"],
-            "type": "text/javascript"
-          }
-        }
-      ]
-    },
-    {
-      "name": "08 - Produto inexistente retorna 404",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"unidadeId\": \"{{unidadeId}}\",\n  \"canalPedido\": \"APP\",\n  \"itens\": [\n    {\n      \"produtoId\": \"99999999-9999-4999-8999-999999999999\",\n      \"quantidade\": 1\n    }\n  ]\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/pedidos",
-          "host": ["{{baseUrl}}"],
-          "path": ["pedidos"]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": ["pm.test('returns 404', () => pm.response.to.have.status(404));"],
-            "type": "text/javascript"
-          }
-        }
-      ]
-    },
-    {
-      "name": "09 - Estoque insuficiente retorna 409",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"unidadeId\": \"{{unidadeId}}\",\n  \"canalPedido\": \"WEB\",\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": 9999\n    }\n  ]\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/pedidos",
-          "host": ["{{baseUrl}}"],
-          "path": ["pedidos"]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": ["pm.test('returns 409', () => pm.response.to.have.status(409));"],
-            "type": "text/javascript"
-          }
-        }
-      ]
-    },
-    {
-      "name": "10 - Pedido válido criado com sucesso",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"unidadeId\": \"{{unidadeId}}\",\n  \"canalPedido\": \"APP\",\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": 1\n    }\n  ]\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/pedidos",
-          "host": ["{{baseUrl}}"],
-          "path": ["pedidos"]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('returns 201', () => pm.response.to.have.status(201));",
-              "const json = pm.response.json();",
-              "pm.test('starts waiting for payment', () => pm.expect(json.status).to.eql('AGUARDANDO_PAGAMENTO'));",
-              "pm.collectionVariables.set('pedidoId', json.id);"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ]
-    },
-    {
-      "name": "11 - Pagamento mock aprovado atualiza status",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"aprovado\": true\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/pedidos/{{pedidoId}}/pagamentos/mock",
-          "host": ["{{baseUrl}}"],
-          "path": ["pedidos", "{{pedidoId}}", "pagamentos", "mock"]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('returns 200', () => pm.response.to.have.status(200));",
-              "const json = pm.response.json();",
-              "pm.test('updates order status to paid', () => pm.expect(json.status).to.eql('PAGO'));",
-              "pm.test('stores approved payment', () => pm.expect(json.pagamento.status).to.eql('APROVADO'));"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ]
-    },
-    {
-      "name": "12 - Criar pedido para pagamento recusado",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"unidadeId\": \"{{unidadeId}}\",\n  \"canalPedido\": \"TOTEM\",\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": 1\n    }\n  ]\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/pedidos",
-          "host": ["{{baseUrl}}"],
-          "path": ["pedidos"]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('returns 201', () => pm.response.to.have.status(201));",
-              "const json = pm.response.json();",
-              "pm.collectionVariables.set('pedidoRecusadoId', json.id);"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ]
-    },
-    {
-      "name": "13 - Pagamento mock recusado retorna status coerente",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"aprovado\": false\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/pedidos/{{pedidoRecusadoId}}/pagamentos/mock",
-          "host": ["{{baseUrl}}"],
-          "path": ["pedidos", "{{pedidoRecusadoId}}", "pagamentos", "mock"]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('returns 200', () => pm.response.to.have.status(200));",
-              "const json = pm.response.json();",
-              "pm.test('updates order status to refused payment', () => pm.expect(json.status).to.eql('PAGAMENTO_RECUSADO'));",
-              "pm.test('stores refused payment', () => pm.expect(json.pagamento.status).to.eql('RECUSADO'));"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ]
-    },
-    {
-      "name": "14 - Consulta de auditorias com ADMIN",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{adminToken}}"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/auditorias?page=1&limit=10&entidade=Pedido",
-          "host": ["{{baseUrl}}"],
-          "path": ["auditorias"],
-          "query": [
-            {
-              "key": "page",
-              "value": "1"
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"cliente@raizes.local\",\n  \"senha\": \"Senha@123\"\n}"
             },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "event": [
             {
-              "key": "limit",
-              "value": "10"
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('returns access token', () => pm.expect(json.accessToken).to.be.a('string').and.not.empty);",
+                  "pm.collectionVariables.set('token', json.accessToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 - Login válido como ADMIN",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@raizes.local\",\n  \"senha\": \"Senha@123\"\n}"
             },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "event": [
             {
-              "key": "entidade",
-              "value": "Pedido"
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('returns admin token', () => pm.expect(json.accessToken).to.be.a('string').and.not.empty);",
+                  "pm.collectionVariables.set('adminToken', json.accessToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 - Registrar novo usuário",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Cliente Postman\",\n  \"email\": \"cliente.postman.{{$timestamp}}@raizes.local\",\n  \"senha\": \"Senha@123\",\n  \"perfil\": \"CLIENTE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/registrar",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "registrar"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('returns registered user token', () => pm.expect(json.accessToken).to.be.a('string').and.not.empty);",
+                  "pm.test('does not expose password hash', () => pm.expect(json.usuario).not.to.have.property('senhaHash'));",
+                  "pm.collectionVariables.set('usuarioRegistradoToken', json.accessToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 - Acesso sem token retorna 401",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('returns 401', () => pm.response.to.have.status(401));"],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 - Perfil sem permissão retorna 403",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuarios"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('returns 403', () => pm.response.to.have.status(403));"],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "06 - Campo obrigatório ausente retorna 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeId\": \"{{unidadeId}}\",\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('returns 422', () => pm.response.to.have.status(422));"],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "07 - Tipo ou formato inválido retorna 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeId\": \"{{unidadeId}}\",\n  \"canalPedido\": \"APP\",\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": \"uma\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('returns 422', () => pm.response.to.have.status(422));"],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "08 - Produto inexistente retorna 404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeId\": \"{{unidadeId}}\",\n  \"canalPedido\": \"APP\",\n  \"itens\": [\n    {\n      \"produtoId\": \"99999999-9999-4999-8999-999999999999\",\n      \"quantidade\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('returns 404', () => pm.response.to.have.status(404));"],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "09 - Estoque insuficiente retorna 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeId\": \"{{unidadeId}}\",\n  \"canalPedido\": \"WEB\",\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": 9999\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('returns 409', () => pm.response.to.have.status(409));"],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "10 - Pedido válido criado com sucesso",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeId\": \"{{unidadeId}}\",\n  \"canalPedido\": \"APP\",\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('starts waiting for payment', () => pm.expect(json.status).to.eql('AGUARDANDO_PAGAMENTO'));",
+                  "pm.collectionVariables.set('pedidoId', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "11 - Pagamento mock aprovado atualiza status",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"aprovado\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/{{pedidoId}}/pagamentos/mock",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos", "{{pedidoId}}", "pagamentos", "mock"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('updates order status to paid', () => pm.expect(json.status).to.eql('PAGO'));",
+                  "pm.test('stores approved payment', () => pm.expect(json.pagamento.status).to.eql('APROVADO'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "12 - Criar pedido para pagamento recusado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeId\": \"{{unidadeId}}\",\n  \"canalPedido\": \"TOTEM\",\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('pedidoRecusadoId', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "13 - Pagamento mock recusado retorna status coerente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"aprovado\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/{{pedidoRecusadoId}}/pagamentos/mock",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos", "{{pedidoRecusadoId}}", "pagamentos", "mock"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('updates order status to refused payment', () => pm.expect(json.status).to.eql('PAGAMENTO_RECUSADO'));",
+                  "pm.test('stores refused payment', () => pm.expect(json.pagamento.status).to.eql('RECUSADO'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "14 - Consulta de auditorias com ADMIN",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auditorias?page=1&limit=10&entidade=Pedido",
+              "host": ["{{baseUrl}}"],
+              "path": ["auditorias"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "entidade",
+                  "value": "Pedido"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('returns paginated audit data', () => {",
+                  "  pm.expect(json.data).to.be.an('array');",
+                  "  pm.expect(json.meta).to.have.property('page', 1);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
             }
           ]
         }
-      },
-      "event": [
+      ]
+    },
+    {
+      "name": "Smoke - endpoints implementados",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('returns 200', () => pm.response.to.have.status(200));",
-              "const json = pm.response.json();",
-              "pm.test('returns paginated audit data', () => {",
-              "  pm.expect(json.data).to.be.an('array');",
-              "  pm.expect(json.meta).to.have.property('page', 1);",
-              "});"
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('returns 200', () => pm.response.to.have.status(200));"],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /auth/me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
             ],
-            "type": "text/javascript"
-          }
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('returns current user without password hash', () => {",
+                  "  pm.expect(json.email).to.eql('cliente@raizes.local');",
+                  "  pm.expect(json).not.to.have.property('senhaHash');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /usuarios com ADMIN",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuarios"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('returns paginated users without password hash', () => {",
+                  "  pm.expect(json.data).to.be.an('array');",
+                  "  pm.expect(json.data[0]).not.to.have.property('senhaHash');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /unidades",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/unidades?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["unidades"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('returns paginated units', () => pm.expect(json.data).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /unidades/:unidadeId/produtos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/unidades/{{unidadeId}}/produtos?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["unidades", "{{unidadeId}}", "produtos"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('returns available products', () => pm.expect(json.data).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /produtos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/produtos?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["produtos"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('returns paginated products', () => pm.expect(json.data).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /estoques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/estoques?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["estoques"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('returns paginated stock balances', () => pm.expect(json.data).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /estoques/movimentacoes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeId\": \"{{unidadeId}}\",\n  \"produtoId\": \"{{produtoId}}\",\n  \"tipo\": \"ENTRADA\",\n  \"quantidade\": 1,\n  \"motivo\": \"Smoke test Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/estoques/movimentacoes",
+              "host": ["{{baseUrl}}"],
+              "path": ["estoques", "movimentacoes"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('returns stock movement', () => pm.expect(json.movimentacao.tipo).to.eql('ENTRADA'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /pedidos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pedidos?page=1&limit=10&canalPedido=APP",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "canalPedido",
+                  "value": "APP"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('returns paginated orders', () => pm.expect(json.data).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /pedidos/:id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/{{pedidoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos", "{{pedidoId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('returns selected order', () => pm.expect(json.id).to.eql(pm.collectionVariables.get('pedidoId')));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /pedidos/:id/status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"EM_PREPARO\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/{{pedidoId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos", "{{pedidoId}}", "status"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('updates order status', () => pm.expect(json.status).to.eql('EM_PREPARO'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /pedidos para cancelamento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unidadeId\": \"{{unidadeId}}\",\n  \"canalPedido\": \"WEB\",\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pedidos",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('pedidoCancelamentoId', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /pedidos/:id/cancelar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pedidos/{{pedidoCancelamentoId}}/cancelar",
+              "host": ["{{baseUrl}}"],
+              "path": ["pedidos", "{{pedidoCancelamentoId}}", "cancelar"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('cancels order', () => pm.expect(json.status).to.eql('CANCELADO'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     }
