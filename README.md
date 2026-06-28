@@ -12,6 +12,8 @@ API Back-end do Projeto Multidisciplinar da trilha Back-end.
 - Swagger/OpenAPI
 - Vitest
 - Biome
+- Husky
+- lint-staged
 
 ## Requisitos
 
@@ -67,9 +69,23 @@ pnpm start:dev
 
 ```sh
 pnpm check
+pnpm lint
 pnpm typecheck
 pnpm test
 pnpm build
+```
+
+## Hooks de Git
+
+O projeto usa Husky e lint-staged.
+
+- `pre-commit`: executa `pnpm run precommit`, que roda `lint-staged` nos arquivos staged.
+- `pre-push`: executa `pnpm run prepush`, que roda `check`, `lint`, `typecheck`, `test` e `build`.
+
+Depois de clonar o projeto e instalar as dependencias, o script `prepare` configura os hooks:
+
+```sh
+pnpm install
 ```
 
 ## Usuarios do seed
@@ -79,4 +95,7 @@ Todos usam a senha `Senha@123`.
 | Perfil | E-mail |
 | --- | --- |
 | ADMIN | `admin@raizes.local` |
+| GERENTE | `gerente@raizes.local` |
+| ATENDENTE | `atendente@raizes.local` |
+| COZINHA | `cozinha@raizes.local` |
 | CLIENTE | `cliente@raizes.local` |

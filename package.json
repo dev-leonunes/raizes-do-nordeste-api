@@ -13,6 +13,9 @@
     "pnpm": ">=11.7.0"
   },
   "scripts": {
+    "prepare": "husky",
+    "precommit": "lint-staged",
+    "prepush": "pnpm check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "build": "nest build",
@@ -44,6 +47,7 @@
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "dotenv": "16.4.5",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
@@ -63,9 +67,6 @@
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
   },
   "lint-staged": {
     "*.{ts,js,json,md}": "biome check --write --no-errors-on-unmatched"

@@ -39,6 +39,48 @@ async function main() {
     },
   });
 
+  await prisma.usuario.upsert({
+    where: { email: "gerente@raizes.local" },
+    update: {
+      unidadeId: unidade.id,
+    },
+    create: {
+      nome: "Gerente Raizes",
+      email: "gerente@raizes.local",
+      senhaHash,
+      perfil: PerfilUsuario.GERENTE,
+      unidadeId: unidade.id,
+    },
+  });
+
+  await prisma.usuario.upsert({
+    where: { email: "atendente@raizes.local" },
+    update: {
+      unidadeId: unidade.id,
+    },
+    create: {
+      nome: "Atendente Raizes",
+      email: "atendente@raizes.local",
+      senhaHash,
+      perfil: PerfilUsuario.ATENDENTE,
+      unidadeId: unidade.id,
+    },
+  });
+
+  await prisma.usuario.upsert({
+    where: { email: "cozinha@raizes.local" },
+    update: {
+      unidadeId: unidade.id,
+    },
+    create: {
+      nome: "Cozinha Raizes",
+      email: "cozinha@raizes.local",
+      senhaHash,
+      perfil: PerfilUsuario.COZINHA,
+      unidadeId: unidade.id,
+    },
+  });
+
   const produto = await prisma.produto.upsert({
     where: { id: "00000000-0000-0000-0000-000000000101" },
     update: {},
