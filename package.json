@@ -18,6 +18,8 @@
     "build": "nest build",
     "check": "biome check .",
     "check:write": "biome check --write .",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
