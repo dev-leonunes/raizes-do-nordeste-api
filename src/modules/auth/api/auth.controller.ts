@@ -6,6 +6,8 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiTags,
+  ApiUnauthorizedResponse,
+  ApiUnprocessableEntityResponse,
 } from "@nestjs/swagger";
 import { AuthService } from "../application/auth.service";
 import { UsuarioAtual } from "../decorators/usuario-atual.decorator";
@@ -25,6 +27,7 @@ export class AuthController {
   @ApiOperation({ summary: "Registra um usuário e retorna token JWT." })
   @ApiBody({ type: RegistrarUsuarioDto })
   @ApiCreatedResponse({ type: AuthResponseDto })
+  @ApiUnprocessableEntityResponse({ description: "Dados de cadastro inválidos." })
   registrar(@Body() dto: RegistrarUsuarioDto) {
     return this.authService.registrar(dto);
   }
@@ -33,6 +36,8 @@ export class AuthController {
   @ApiOperation({ summary: "Autentica usuário por e-mail e senha." })
   @ApiBody({ type: LoginDto })
   @ApiOkResponse({ type: AuthResponseDto })
+  @ApiUnauthorizedResponse({ description: "Credenciais inválidas." })
+  @ApiUnprocessableEntityResponse({ description: "Dados de login inválidos." })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
@@ -42,6 +47,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: "Retorna o usuário autenticado." })
   @ApiOkResponse({ type: UsuarioResponseDto })
+  @ApiUnauthorizedResponse({ description: "Token ausente ou inválido." })
   me(@UsuarioAtual() usuario: UsuarioAutenticado) {
     return this.authService.buscarUsuarioAtual(usuario.id);
   }

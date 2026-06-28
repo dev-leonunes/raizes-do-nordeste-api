@@ -19,8 +19,8 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle("Raizes do Nordeste API")
-    .setDescription("API Back-end do projeto multidisciplinar Raizes do Nordeste.")
+    .setTitle("Raízes do Nordeste API")
+    .setDescription("API Back-end do projeto multidisciplinar Raízes do Nordeste.")
     .setVersion("0.1.0")
     .addBearerAuth()
     .build();

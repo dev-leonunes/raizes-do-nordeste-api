@@ -2,6 +2,7 @@ import { Controller, Get, Inject, Param, Query, UseGuards } from "@nestjs/common
 import {
   ApiBearerAuth,
   ApiExtraModels,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -41,6 +42,7 @@ export class UnidadesController {
   @ApiParam({ name: "unidadeId", description: "ID da unidade." })
   @ApiOkResponse({ type: ProdutosUnidadePaginadosResponseDto })
   @ApiUnauthorizedResponse({ description: "Token ausente ou inválido." })
+  @ApiNotFoundResponse({ description: "Unidade não encontrada." })
   listarProdutosDisponiveis(@Param() params: UnidadeParamsDto, @Query() paginacao: PaginacaoDto) {
     return this.unidadesService.listarProdutosDisponiveis(params.unidadeId, paginacao);
   }
