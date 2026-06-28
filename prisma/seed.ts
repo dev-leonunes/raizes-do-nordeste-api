@@ -2,15 +2,17 @@ import { PerfilUsuario, PrismaClient } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
+const unidadeSeedId = "11111111-1111-4111-8111-111111111111";
+const produtoSeedId = "22222222-2222-4222-8222-222222222222";
 
 async function main() {
   const senhaHash = await bcrypt.hash("Senha@123", 10);
 
   const unidade = await prisma.unidade.upsert({
-    where: { id: "00000000-0000-0000-0000-000000000001" },
+    where: { id: unidadeSeedId },
     update: {},
     create: {
-      id: "00000000-0000-0000-0000-000000000001",
+      id: unidadeSeedId,
       nome: "Raizes Recife Centro",
       cidade: "Recife",
       estado: "PE",
@@ -82,10 +84,10 @@ async function main() {
   });
 
   const produto = await prisma.produto.upsert({
-    where: { id: "00000000-0000-0000-0000-000000000101" },
+    where: { id: produtoSeedId },
     update: {},
     create: {
-      id: "00000000-0000-0000-0000-000000000101",
+      id: produtoSeedId,
       nome: "Cuscuz com queijo coalho",
       descricao: "Cuscuz nordestino com queijo coalho.",
       preco: "18.90",

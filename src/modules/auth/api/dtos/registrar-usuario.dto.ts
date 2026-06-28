@@ -22,7 +22,7 @@ export class RegistrarUsuarioDto {
   @IsEnum(PerfilUsuario)
   perfil?: PerfilUsuario;
 
-  @ApiPropertyOptional({ example: "00000000-0000-0000-0000-000000000001" })
+  @ApiPropertyOptional({ example: "11111111-1111-4111-8111-111111111111" })
   @IsOptional()
   @IsUUID()
   unidadeId?: string;

@@ -123,8 +123,8 @@ Também são criados:
 
 | Tipo    | Identificador                          | Descrição                |
 | ------- | -------------------------------------- | ------------------------ |
-| Unidade | `00000000-0000-0000-0000-000000000001` | Raízes Recife Centro     |
-| Produto | `00000000-0000-0000-0000-000000000101` | Cuscuz com queijo coalho |
+| Unidade | `11111111-1111-4111-8111-111111111111` | Raízes Recife Centro     |
+| Produto | `22222222-2222-4222-8222-222222222222` | Cuscuz com queijo coalho |
 
 Esses dados são apenas para desenvolvimento local e evidências executáveis. Não use dados reais na coleção Postman ou em testes manuais.
 

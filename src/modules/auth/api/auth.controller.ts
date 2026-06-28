@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Inject, Post, UseGuards } from "@nestjs/common";
 import {
   ApiBearerAuth,
   ApiBody,
@@ -33,6 +33,7 @@ export class AuthController {
   }
 
   @Post("login")
+  @HttpCode(200)
   @ApiOperation({ summary: "Autentica usuário por e-mail e senha." })
   @ApiBody({ type: LoginDto })
   @ApiOkResponse({ type: AuthResponseDto })

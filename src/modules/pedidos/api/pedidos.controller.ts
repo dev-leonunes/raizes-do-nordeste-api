@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Inject,
   Param,
   Patch,
@@ -80,6 +81,7 @@ export class PedidosController {
   }
 
   @Post(":id/pagamentos/mock")
+  @HttpCode(200)
   @ApiOperation({ summary: "Simula pagamento mock aprovado ou recusado." })
   @ApiBody({ type: PagarPedidoMockDto })
   @ApiOkResponse({ type: PedidoResponseDto })
@@ -115,6 +117,7 @@ export class PedidosController {
   }
 
   @Post(":id/cancelar")
+  @HttpCode(200)
   @ApiOperation({ summary: "Cancela um pedido quando permitido pelas regras de acesso." })
   @ApiOkResponse({ type: PedidoResponseDto })
   @ApiUnauthorizedResponse({ description: "Token ausente ou inválido." })
