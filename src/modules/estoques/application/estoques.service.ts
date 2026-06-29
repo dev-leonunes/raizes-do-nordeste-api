@@ -1,5 +1,11 @@
-import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { AcaoAuditoria, type Prisma, TipoMovimentacaoEstoque } from "@prisma/client";
+import {
+  ConflictException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { AcaoAuditoria, PerfilUsuario, type Prisma, TipoMovimentacaoEstoque } from "@prisma/client";
 import { criarRespostaPaginada } from "../../../shared/application/paginacao";
 import { PrismaService } from "../../../shared/infrastructure/prisma/prisma.service";
 import type { UsuarioAutenticado } from "../../auth/domain/usuario-autenticado";
@@ -10,9 +16,10 @@ import type { ListarEstoquesDto } from "../api/dtos/listar-estoques.dto";
 export class EstoquesService {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
-  async listar(filtros: ListarEstoquesDto) {
-    const { page, limit, unidadeId } = filtros;
+  async listar(filtros: ListarEstoquesDto, usuario: UsuarioAutenticado) {
+    const { page, limit } = filtros;
     const skip = (page - 1) * limit;
+    const unidadeId = this.obterUnidadePermitida(filtros.unidadeId, usuario);
     const where = unidadeId ? { unidadeId } : {};
 
     const [estoques, total] = await this.prisma.$transaction([
@@ -51,6 +58,8 @@ export class EstoquesService {
   }
 
   async criarMovimentacao(dto: CriarMovimentacaoEstoqueDto, usuario: UsuarioAutenticado) {
+    this.validarAcessoUnidade(dto.unidadeId, usuario);
+
     return this.prisma.$transaction(async (transacao) => {
       const [unidade, produto] = await Promise.all([
         transacao.unidade.findUnique({ where: { id: dto.unidadeId } }),
@@ -148,5 +157,31 @@ export class EstoquesService {
     }
 
     return novaQuantidade;
+  }
+
+  private obterUnidadePermitida(unidadeId: string | undefined, usuario: UsuarioAutenticado) {
+    if (usuario.perfil !== PerfilUsuario.GERENTE) {
+      return unidadeId;
+    }
+
+    if (!usuario.unidadeId) {
+      throw new ForbiddenException("Gerente sem unidade vinculada não pode consultar estoque.");
+    }
+
+    if (unidadeId && unidadeId !== usuario.unidadeId) {
+      throw new ForbiddenException("Gerente só pode consultar estoque da própria unidade.");
+    }
+
+    return usuario.unidadeId;
+  }
+
+  private validarAcessoUnidade(unidadeId: string, usuario: UsuarioAutenticado) {
+    if (usuario.perfil !== PerfilUsuario.GERENTE) {
+      return;
+    }
+
+    if (!usuario.unidadeId || unidadeId !== usuario.unidadeId) {
+      throw new ForbiddenException("Gerente só pode movimentar estoque da própria unidade.");
+    }
   }
 }

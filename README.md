@@ -115,6 +115,7 @@ O seed cria dados locais de teste. Todos os usuários abaixo usam a senha `Senha
 | --------- | ------------------------ |
 | ADMIN     | `admin@raizes.local`     |
 | GERENTE   | `gerente@raizes.local`   |
+| GERENTE   | `gerente.fortaleza@raizes.local` |
 | ATENDENTE | `atendente@raizes.local` |
 | COZINHA   | `cozinha@raizes.local`   |
 | CLIENTE   | `cliente@raizes.local`   |
@@ -153,13 +154,21 @@ As rotas protegidas usam autenticação Bearer. Para testar no Swagger:
 
 ### Auth
 
-- `POST /auth/registrar`: registra usuário e retorna token JWT.
+- `POST /auth/registrar`: registra somente cliente e retorna token JWT. Campos `perfil` e `unidadeId` não fazem parte do contrato público.
 - `POST /auth/login`: autentica usuário por e-mail e senha.
 - `GET /auth/me`: retorna o usuário autenticado.
 
 ### Usuários
 
 - `GET /usuarios`: lista usuários com paginação. Requer JWT e perfil `ADMIN`.
+- `POST /usuarios/funcionarios`: cadastra funcionário. Requer JWT e perfil `ADMIN` ou `GERENTE`.
+- `PATCH /usuarios/funcionarios/:id`: atualiza funcionário. Requer JWT e perfil `ADMIN` ou `GERENTE`.
+
+Regras principais:
+
+- `ADMIN` pode criar e editar `ADMIN`, `GERENTE`, `ATENDENTE` e `COZINHA`.
+- `GERENTE` só pode criar e editar `ATENDENTE` e `COZINHA` da própria unidade.
+- A rota de funcionários não cria nem transforma usuários em `CLIENTE`.
 
 ### Unidades
 
@@ -174,6 +183,8 @@ As rotas protegidas usam autenticação Bearer. Para testar no Swagger:
 
 - `GET /estoques`: lista saldos de estoque por unidade e produto. Requer JWT e perfil `ADMIN` ou `GERENTE`.
 - `POST /estoques/movimentacoes`: cria movimentação de estoque e atualiza o saldo. Requer JWT e perfil `ADMIN` ou `GERENTE`.
+
+`ADMIN` tem acesso global ao estoque. `GERENTE` lista e movimenta apenas estoque da própria unidade; sem filtro, a listagem retorna automaticamente a unidade vinculada ao gerente.
 
 ### Pedidos
 

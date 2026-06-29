@@ -1,4 +1,4 @@
-import { ConflictException } from "@nestjs/common";
+import { ConflictException, ForbiddenException } from "@nestjs/common";
 import { AcaoAuditoria, PerfilUsuario, TipoMovimentacaoEstoque } from "@prisma/client";
 import { describe, expect, it, vi } from "vitest";
 import type { PrismaService } from "../../../shared/infrastructure/prisma/prisma.service";
@@ -33,6 +33,67 @@ const produto = {
 };
 
 describe("EstoquesService", () => {
+  it("lets ADMIN list stock globally and by any unit", async () => {
+    const prisma = criarPrismaListagemMock();
+    const service = new EstoquesService(prisma as unknown as PrismaService);
+    const admin: UsuarioAutenticado = {
+      id: "admin-1",
+      email: "admin@raizes.local",
+      perfil: PerfilUsuario.ADMIN,
+      unidadeId: null,
+    };
+
+    await service.listar({ page: 1, limit: 10 }, admin);
+    await service.listar({ page: 1, limit: 10, unidadeId: "unidade-2" }, admin);
+
+    expect(prisma.estoque.findMany).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ where: {} }),
+    );
+    expect(prisma.estoque.findMany).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ where: { unidadeId: "unidade-2" } }),
+    );
+  });
+
+  it("scopes GERENTE stock listing to their own unit", async () => {
+    const prisma = criarPrismaListagemMock();
+    const service = new EstoquesService(prisma as unknown as PrismaService);
+
+    await service.listar({ page: 1, limit: 10 }, usuario);
+    await service.listar({ page: 1, limit: 10, unidadeId: "unidade-1" }, usuario);
+
+    expect(prisma.estoque.findMany).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ where: { unidadeId: "unidade-1" } }),
+    );
+    expect(prisma.estoque.findMany).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ where: { unidadeId: "unidade-1" } }),
+    );
+  });
+
+  it("blocks GERENTE from listing or moving stock from another unit", async () => {
+    const prisma = criarPrismaListagemMock();
+    const service = new EstoquesService(prisma as unknown as PrismaService);
+
+    await expect(
+      service.listar({ page: 1, limit: 10, unidadeId: "unidade-2" }, usuario),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    await expect(
+      service.criarMovimentacao(
+        {
+          unidadeId: "unidade-2",
+          produtoId: "produto-1",
+          tipo: TipoMovimentacaoEstoque.ENTRADA,
+          quantidade: 1,
+        },
+        usuario,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
   it("rejects stock output when available quantity is insufficient", async () => {
     const transacao = criarTransacaoMock({ quantidadeAtual: 2 });
     const prisma = criarPrismaMock(transacao);
@@ -122,6 +183,28 @@ describe("EstoquesService", () => {
 function criarPrismaMock(transacao: ReturnType<typeof criarTransacaoMock>) {
   return {
     $transaction: vi.fn((callback) => callback(transacao)),
+  };
+}
+
+function criarPrismaListagemMock() {
+  const estoque = {
+    id: "estoque-1",
+    unidadeId: "unidade-1",
+    produtoId: "produto-1",
+    quantidade: 5,
+    quantidadeMinima: 0,
+    criadoEm: new Date("2026-06-27T10:00:00.000Z"),
+    atualizadoEm: new Date("2026-06-27T10:00:00.000Z"),
+    unidade: { id: "unidade-1", nome: "Raizes Recife Centro" },
+    produto: { id: "produto-1", nome: "Cuscuz", preco: { toString: () => "18.9" }, ativo: true },
+  };
+
+  return {
+    $transaction: vi.fn().mockResolvedValue([[estoque], 1]),
+    estoque: {
+      findMany: vi.fn().mockReturnValue("findMany-query"),
+      count: vi.fn().mockReturnValue("count-query"),
+    },
   };
 }
 

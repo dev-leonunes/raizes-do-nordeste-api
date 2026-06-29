@@ -1,6 +1,7 @@
 import { PerfilUsuario } from "@prisma/client";
 import { describe, expect, it, vi } from "vitest";
 import type { PrismaService } from "../../../shared/infrastructure/prisma/prisma.service";
+import type { AuthService } from "../../auth/application/auth.service";
 import { UsuariosService } from "./usuarios.service";
 
 describe("UsuariosService", () => {
@@ -23,7 +24,10 @@ describe("UsuariosService", () => {
         count: vi.fn().mockReturnValue("count-query"),
       },
     };
-    const service = new UsuariosService(prisma as unknown as PrismaService);
+    const service = new UsuariosService(
+      prisma as unknown as PrismaService,
+      {} as unknown as AuthService,
+    );
 
     const resposta = await service.listar({ page: 1, limit: 10 });
 

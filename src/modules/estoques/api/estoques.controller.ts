@@ -38,8 +38,8 @@ export class EstoquesController {
   @ApiOkResponse({ type: EstoquesPaginadosResponseDto })
   @ApiUnauthorizedResponse({ description: "Token ausente ou inválido." })
   @ApiForbiddenResponse({ description: "Perfil sem permissão para consultar estoques." })
-  listar(@Query() filtros: ListarEstoquesDto) {
-    return this.estoquesService.listar(filtros);
+  listar(@Query() filtros: ListarEstoquesDto, @UsuarioAtual() usuario: UsuarioAutenticado) {
+    return this.estoquesService.listar(filtros, usuario);
   }
 
   @Post("movimentacoes")

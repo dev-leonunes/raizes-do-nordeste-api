@@ -172,6 +172,20 @@ async function main() {
   });
 
   await prisma.usuario.upsert({
+    where: { email: "gerente.fortaleza@raizes.local" },
+    update: {
+      unidadeId: unidadeFortaleza.id,
+    },
+    create: {
+      nome: "Gerente Fortaleza",
+      email: "gerente.fortaleza@raizes.local",
+      senhaHash,
+      perfil: PerfilUsuario.GERENTE,
+      unidadeId: unidadeFortaleza.id,
+    },
+  });
+
+  await prisma.usuario.upsert({
     where: { email: "gerente.salvador@raizes.local" },
     update: {
       unidadeId: unidadeSalvador.id,
