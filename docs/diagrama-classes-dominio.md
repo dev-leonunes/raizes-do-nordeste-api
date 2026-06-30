@@ -103,6 +103,37 @@ classDiagram
     PAGAMENTO_RECUSADO
   }
 
+  class StatusPagamento {
+    <<enumeration>>
+    PENDENTE
+    APROVADO
+    RECUSADO
+  }
+
+  class MetodoPagamento {
+    <<enumeration>>
+    MOCK
+  }
+
+  class TipoMovimentacaoEstoque {
+    <<enumeration>>
+    ENTRADA
+    SAIDA
+    AJUSTE
+  }
+
+  class AcaoAuditoria {
+    <<enumeration>>
+    USUARIO_LOGIN
+    PEDIDO_CRIADO
+    STATUS_PEDIDO_ATUALIZADO
+    PEDIDO_CANCELADO
+    PAGAMENTO_CRIADO
+    PAGAMENTO_APROVADO
+    PAGAMENTO_RECUSADO
+    ESTOQUE_MOVIMENTADO
+  }
+
   Usuario "0..*" --> "0..1" Unidade
   Unidade "1" --> "0..*" Estoque
   Unidade "1" --> "0..*" Pedido

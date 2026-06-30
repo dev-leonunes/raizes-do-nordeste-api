@@ -7,11 +7,13 @@ flowchart LR
   Cozinha["Cozinha"]
   Gerente["Gerente"]
   Admin["Administrador"]
+  Gateway["Sistema externo de pagamento (mock)"]
 
   Login(("Autenticar usuário"))
   Cardapio(("Consultar cardápio por unidade"))
   CriarPedido(("Criar pedido multicanal"))
-  PagarPedido(("Realizar pagamento mock"))
+  SolicitarPagamento(("Solicitar pagamento mock"))
+  RegistrarRetornoPagamento(("Registrar retorno do pagamento"))
   ConsultarPedido(("Consultar pedidos"))
   AtualizarStatus(("Atualizar status do pedido"))
   CancelarPedido(("Cancelar pedido"))
@@ -23,7 +25,7 @@ flowchart LR
   Cliente --> Login
   Cliente --> Cardapio
   Cliente --> CriarPedido
-  Cliente --> PagarPedido
+  Cliente --> SolicitarPagamento
   Cliente --> ConsultarPedido
   Cliente --> CancelarPedido
 
@@ -50,4 +52,8 @@ flowchart LR
   Admin --> MovimentarEstoque
   Admin --> CancelarPedido
   Admin --> ConsultarAuditoria
+
+  SolicitarPagamento --> Gateway
+  Gateway --> RegistrarRetornoPagamento
+  RegistrarRetornoPagamento --> AtualizarStatus
 ```
