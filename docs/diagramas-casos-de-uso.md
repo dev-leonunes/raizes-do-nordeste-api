@@ -1,31 +1,47 @@
 # Diagrama de casos de uso
 
-```mermaid
-flowchart LR
-  Cliente["Cliente"]
-  Atendente["Atendente"]
-  Cozinha["Cozinha"]
-  Gerente["Gerente"]
-  Admin["Administrador"]
-  Gateway["Sistema externo de pagamento (mock)"]
+## Casos de uso principais
 
-  Login(("Autenticar usuário"))
-  Cardapio(("Consultar cardápio por unidade"))
-  CriarPedido(("Criar pedido multicanal"))
-  SolicitarPagamento(("Solicitar pagamento mock"))
-  RegistrarRetornoPagamento(("Registrar retorno do pagamento"))
-  ConsultarPedido(("Consultar pedidos"))
-  AtualizarStatus(("Atualizar status do pedido"))
-  CancelarPedido(("Cancelar pedido"))
-  ConsultarEstoque(("Consultar estoque"))
-  MovimentarEstoque(("Movimentar estoque"))
-  ConsultarUsuarios(("Consultar usuários"))
-  ConsultarAuditoria(("Consultar auditorias"))
+```mermaid
+flowchart TB
+  subgraph Atores["Atores"]
+    direction LR
+    Cliente["Cliente"]
+    Atendente["Atendente"]
+    Cozinha["Cozinha"]
+    Gerente["Gerente"]
+    Admin["Administrador"]
+  end
+
+  subgraph Sistema["API Raízes do Nordeste"]
+    direction LR
+
+    subgraph Publico["Atendimento e pedidos"]
+      direction TB
+      Login(("Autenticar usuário"))
+      Cardapio(("Consultar cardápio por unidade"))
+      CriarPedido(("Criar pedido multicanal"))
+      ConsultarPedido(("Consultar pedidos"))
+      CancelarPedido(("Cancelar pedido"))
+    end
+
+    subgraph Operacao["Operação"]
+      direction TB
+      AtualizarStatus(("Atualizar status do pedido"))
+      ConsultarEstoque(("Consultar estoque"))
+      MovimentarEstoque(("Movimentar estoque"))
+    end
+
+    subgraph Administracao["Administração"]
+      direction TB
+      ConsultarUsuarios(("Consultar usuários"))
+      ConsultarAuditoria(("Consultar auditorias"))
+    end
+  end
 
   Cliente --> Login
   Cliente --> Cardapio
   Cliente --> CriarPedido
-  Cliente --> SolicitarPagamento
   Cliente --> ConsultarPedido
   Cliente --> CancelarPedido
 
@@ -52,8 +68,27 @@ flowchart LR
   Admin --> MovimentarEstoque
   Admin --> CancelarPedido
   Admin --> ConsultarAuditoria
+```
 
+## Fluxo de pagamento mock
+
+```mermaid
+flowchart LR
+  Cliente["Cliente"]
+  Gateway["Sistema externo de pagamento (mock)"]
+
+  subgraph Sistema["API Raízes do Nordeste"]
+    CriarPedido(("Criar pedido multicanal"))
+    SolicitarPagamento(("Solicitar pagamento mock"))
+    RegistrarRetornoPagamento(("Registrar retorno do pagamento"))
+    AtualizarStatus(("Atualizar status do pedido"))
+    RegistrarAuditoria(("Registrar auditoria"))
+  end
+
+  Cliente --> CriarPedido
+  CriarPedido --> SolicitarPagamento
   SolicitarPagamento --> Gateway
   Gateway --> RegistrarRetornoPagamento
   RegistrarRetornoPagamento --> AtualizarStatus
+  AtualizarStatus --> RegistrarAuditoria
 ```
